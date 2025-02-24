@@ -17,7 +17,7 @@
 
     <script>
         async function sendCommand(action) {
-            const response = await fetch("http://34.169.45.15:5000/control", { // Neue URL hier!
+            const response = await fetch("http://34.169.45.15:5000/control", { // Hier die IP anpassen
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: action })
