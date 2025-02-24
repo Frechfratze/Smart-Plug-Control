@@ -1,37 +1,31 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Tapo Minecraft Server Control</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tapo Steuerung</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        button { font-size: 20px; padding: 10px 20px; margin: 10px; }
+    </style>
 </head>
 <body>
+    <h1>Tapo Smart Plug Steuerung</h1>
+    <button onclick="sendCommand('on')">Steckdose EIN</button>
+    <button onclick="sendCommand('off')">Steckdose AUS</button>
+    <p id="status"></p>
 
-  <!-- LOGIN SECTION -->
-  <div id="login-section">
-    <h1>Minecraft Server Control</h1>
-    <div class="login-box">
-      <label for="username">Benutzername</label>
-      <input type="text" id="username" />
-      
-      <label for="password">Passwort</label>
-      <input type="password" id="password" />
-      
-      <button id="login-button">Login</button>
-    </div>
-  </div>
+    <script>
+        async function sendCommand(action) {
+            const response = await fetch("http://34.169.45.15:5000/control", { // Neue URL hier!
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: action })
+            });
 
-  <!-- CONTROL SECTION -->
-  <div id="control-section" style="display:none;">
-    <h2>Server Steuerung</h2>
-    <p id="status-text">Smart Plug Status: <span id="plug-status">Unbekannt</span></p>
-    <div class="button-row">
-      <button id="start-button" class="server-btn">Start</button>
-      <button id="stop-button" class="server-btn">Stop</button>
-      <button id="restart-button" class="server-btn">Restart</button>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+            const data = await response.json();
+            document.getElementById("status").innerText = data.status || data.error;
+        }
+    </script>
 </body>
 </html>
