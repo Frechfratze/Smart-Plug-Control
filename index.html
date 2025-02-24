@@ -146,6 +146,8 @@
             EMAIL: 'dein-email@example.com',  // Ersetze dies mit deiner TP-Link Tapo E-Mail
             PASSWORD: 'dein-passwort',        // Ersetze dies mit deinem TP-Link Tapo Passwort
             DEVICE_IP: 'deine-gerät-ip',      // Ersetze dies mit der IP-Adresse deines Smart Plugs
+            WEB_USERNAME: 'RowdyRoosters',    // Benutzername für die Website-Anmeldung
+            WEB_PASSWORD: 'Fifi'              // Passwort für die Website-Anmeldung
         };
 
         async function login() {
@@ -212,11 +214,7 @@
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('error-message');
 
-            // Beispiel-Benutzername und -Passwort
-            const correctUsername = 'RowdyRoosters';
-            const correctPassword = 'Fifi';
-
-            if (username === correctUsername && password === correctPassword) {
+            if (username === CONFIG.WEB_USERNAME && password === CONFIG.WEB_PASSWORD) {
                 document.querySelector('.login-container').style.display = 'none';
                 document.querySelector('.container').style.display = 'block';
                 checkStatus(); // Status nach dem Login prüfen
@@ -245,3 +243,4 @@
     </script>
 </body>
 </html>
+
