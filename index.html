@@ -1,209 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraftserver Control</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: url('https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/10/minecraft-buzzy-bees-cozy-update-wallpaper.jpg?q=70&fit=crop&w=1140&h=&dpr=1') no-repeat center center/cover;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 0;
-        }
-
-        .container, .login-container {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
-            width: 90%;
-        }
-
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        input[type="text"], input[type="password"] {
-            padding: 12px;
-            margin: 10px 0;
-            width: calc(100% - 24px);
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
-
-        button {
-            padding: 12px 24px;
-            margin: 10px 5px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        button#start { background-color: #4CAF50; color: white; }
-        button#stop { background-color: #f44336; color: white; }
-        button#restart { background-color: #ff9800; color: white; }
-
-        button:hover { transform: translateY(-2px); opacity: 0.9; }
-
-        .status {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .status-icon {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-        }
-
-        .online { background-color: #4CAF50; }
-        .offline { background-color: #f44336; }
-
-        .error-message {
-            color: red;
-            margin-top: 15px;
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Tapo Minecraft Server Control</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="overlay"></div>
-    <div class="login-container">
-        <h1>Login</h1>
-        <input type="text" id="username" placeholder="Benutzername">
-        <input type="password" id="password" placeholder="Passwort">
-        <button id="loginBtn">Login</button>
-        <div class="error-message" id="error-message">Falscher Benutzername oder Passwort</div>
+
+  <!-- LOGIN SECTION -->
+  <div id="login-section">
+    <h1>Minecraft Server Control</h1>
+    <div class="login-box">
+      <label for="username">Benutzername</label>
+      <input type="text" id="username" />
+      
+      <label for="password">Passwort</label>
+      <input type="password" id="password" />
+      
+      <button id="login-button">Login</button>
     </div>
+  </div>
 
-    <div class="container" style="display: none;">
-        <div class="status">
-            <div id="status-icon" class="status-icon offline"></div>
-            <span id="status-text">Offline</span>
-        </div>
-        <h1>Minecraftserver</h1>
-        <button id="start">Start</button>
-        <button id="stop">Stop</button>
-        <button id="restart">Restart</button>
+  <!-- CONTROL SECTION -->
+  <div id="control-section" style="display:none;">
+    <h2>Server Steuerung</h2>
+    <p id="status-text">Smart Plug Status: <span id="plug-status">Unbekannt</span></p>
+    <div class="button-row">
+      <button id="start-button" class="server-btn">Start</button>
+      <button id="stop-button" class="server-btn">Stop</button>
+      <button id="restart-button" class="server-btn">Restart</button>
     </div>
+  </div>
 
-    <script>
-        const USERNAME = "RowdyRoosters";
-        const PASSWORD = "Fifi";
-
-        document.getElementById("loginBtn").addEventListener("click", function () {
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            if (username === USERNAME && password === PASSWORD) {
-                document.querySelector(".login-container").style.display = "none";
-                document.querySelector(".container").style.display = "block";
-                checkStatus();
-            } else {
-                document.getElementById("error-message").style.display = "block";
-            }
-        });
-
-        async function controlDevice(command) {
-            const response = await fetch("https://eu-wap.tplinkcloud.com/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    method: "login",
-                    params: {
-                        cloudUserName: "DEINE_EMAIL",
-                        cloudPassword: "DEIN_PASSWORT"
-                    }
-                })
-            });
-
-            const data = await response.json();
-            if (!data.result || !data.result.token) {
-                console.error("Login fehlgeschlagen");
-                return;
-            }
-
-            const token = data.result.token;
-            const url = `https://eu-wap.tplinkcloud.com/?token=${token}`;
-
-            await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    method: "passthrough",
-                    params: {
-                        deviceId: "DEINE_DEVICE_ID",
-                        requestData: JSON.stringify({
-                            method: "set_device_info",
-                            params: { device_on: command === "on" }
-                        })
-                    }
-                })
-            });
-
-            checkStatus();
-        }
-
-        async function checkStatus() {
-            const response = await fetch("https://eu-wap.tplinkcloud.com/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    method: "passthrough",
-                    params: {
-                        deviceId: "DEINE_DEVICE_ID",
-                        requestData: JSON.stringify({
-                            method: "get_device_info"
-                        })
-                    }
-                })
-            });
-
-            const data = await response.json();
-            const statusIcon = document.getElementById("status-icon");
-            const statusText = document.getElementById("status-text");
-
-            if (data.result && data.result.device_on) {
-                statusIcon.classList.remove("offline");
-                statusIcon.classList.add("online");
-                statusText.innerText = "Online";
-            } else {
-                statusIcon.classList.remove("online");
-                statusIcon.classList.add("offline");
-                statusText.innerText = "Offline";
-            }
-        }
-
-        document.getElementById("start").addEventListener("click", () => controlDevice("on"));
-        document.getElementById("stop").addEventListener("click", () => controlDevice("off"));
-        document.getElementById("restart").addEventListener("click", async () => {
-            await controlDevice("off");
-            setTimeout(() => controlDevice("on"), 5000);
-        });
-    </script>
+  <script src="script.js"></script>
 </body>
 </html>
