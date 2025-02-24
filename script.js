@@ -8,8 +8,8 @@ const TAPO_PASSWORD = "dein-tapo-passwort";
 const TAPO_DEVICE_ID = "1234567890ABCDEF1234567890ABCDEF"; // Aus Device-Liste rauslesen
 
 // Minimaler Hardcoded-Zugang
-const VALID_USERNAME = "minecraft-admin";
-const VALID_PASSWORD = "meinSuperPasswort";
+const VALID_USERNAME = "RowdyRoosters";
+const VALID_PASSWORD = "Fifi";
 
 let tapoToken = null; // wird gespeichert, wenn wir uns "einloggen"
 
