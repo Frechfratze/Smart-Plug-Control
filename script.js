@@ -159,4 +159,3 @@ async function tapoSetDeviceState(token, deviceId, isOn) {
   const data = await response.json();
   return data;
 }
-
