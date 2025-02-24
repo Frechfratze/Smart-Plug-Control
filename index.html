@@ -91,6 +91,32 @@
             color: red;
             margin-top: 15px;
         }
+
+        .status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .status span {
+            margin-left: 10px;
+            font-size: 18px;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .online {
+            background-color: #4CAF50; /* Green */
+        }
+
+        .offline {
+            background-color: #f44336; /* Red */
+        }
     </style>
 </head>
 <body>
@@ -99,11 +125,15 @@
         <h1>Login</h1>
         <input type="text" id="username" placeholder="Benutzername">
         <input type="password" id="password" placeholder="Passwort">
-        <button class="login-button" onclick="login()">Login</button>
+        <button class="login-button" onclick="loginCheck()">Login</button>
         <div class="error-message" id="error-message" style="display: none;">Falscher Benutzername oder Passwort</div>
     </div>
 
     <div class="container" style="display: none;">
+        <div class="status">
+            <div id="status-icon" class="status-icon offline"></div>
+            <span id="status-text">Offline</span>
+        </div>
         <h1>Minecraftserver</h1>
         <button id="start">Start</button>
         <button id="stop">Stop</button>
@@ -157,7 +187,24 @@
                 })
             });
             const data = await response.json();
-            console.log(data);
+            return data;
+        }
+
+        async function checkStatus() {
+            try {
+                const result = await controlDevice('get_device_info', {});
+                if (result.error_code === 0) {
+                    document.getElementById('status-icon').classList.remove('offline');
+                    document.getElementById('status-icon').classList.add('online');
+                    document.getElementById('status-text').innerText = 'Online';
+                } else {
+                    throw new Error('Device not reachable');
+                }
+            } catch (error) {
+                document.getElementById('status-icon').classList.remove('online');
+                document.getElementById('status-icon').classList.add('offline');
+                document.getElementById('status-text').innerText = 'Offline';
+            }
         }
 
         function loginCheck() {
@@ -172,6 +219,7 @@
             if (username === correctUsername && password === correctPassword) {
                 document.querySelector('.login-container').style.display = 'none';
                 document.querySelector('.container').style.display = 'block';
+                checkStatus(); // Status nach dem Login prüfen
             } else {
                 errorMessage.style.display = 'block';
             }
@@ -179,16 +227,19 @@
 
         document.getElementById('start').addEventListener('click', function () {
             controlDevice('set_device_info', { "device_on": true });
+            checkStatus();
         });
 
         document.getElementById('stop').addEventListener('click', function () {
             controlDevice('set_device_info', { "device_on": false });
+            checkStatus();
         });
 
         document.getElementById('restart').addEventListener('click', async function () {
             await controlDevice('set_device_info', { "device_on": false });
             setTimeout(() => {
                 controlDevice('set_device_info', { "device_on": true });
+                checkStatus();
             }, 5000); // 5 Sekunden warten, bevor der Plug wieder eingeschaltet wird
         });
     </script>
