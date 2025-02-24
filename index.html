@@ -1,25 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Smart Plug Controller</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraftserver</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button#start {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+
+        button#stop {
+            background-color: #f44336; /* Red */
+            color: white;
+        }
+
+        button#restart {
+            background-color: #ff9800; /* Orange */
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
-   <h1>Smart Plug Controller</h1>
-   <button id="turnOn">Turn On</button>
-   <button id="turnOff">Turn Off</button>
+    <div class="container">
+        <h1>Minecraftserver</h1>
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <button id="restart">Restart</button>
+    </div>
 
-   <script>
-       document.getElementById('turnOn').addEventListener('click', function() {
-           // Dein Code zum Einschalten des Smart Plugs
-           console.log('Turning On');
-       });
+    <script>
+        document.getElementById('start').addEventListener('click', function() {
+            // Dein Code zum Starten des Servers
+            console.log('Starting');
+            // Hier kannst du einen API-Aufruf hinzufügen, um den Server zu starten
+        });
 
-       document.getElementById('turnOff').addEventListener('click', function() {
-           // Dein Code zum Ausschalten des Smart Plugs
-           console.log('Turning Off');
-       });
-   </script>
+        document.getElementById('stop').addEventListener('click', function() {
+            // Dein Code zum Stoppen des Servers
+            console.log('Stopping');
+            // Hier kannst du einen API-Aufruf hinzufügen, um den Server zu stoppen
+        });
+
+        document.getElementById('restart').addEventListener('click', function() {
+            // Dein Code zum Neustarten des Servers
+            console.log('Restarting');
+            // Hier kannst du einen API-Aufruf hinzufügen, um den Server neu zu starten
+        });
+    </script>
 </body>
 </html>
