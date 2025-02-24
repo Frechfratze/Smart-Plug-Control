@@ -21,11 +21,29 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none; /* Initially hidden */
+        }
+
+        .login-container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             margin-bottom: 20px;
             color: #333;
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 10px;
+            margin: 10px;
+            width: 80%;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
 
         button {
@@ -56,9 +74,21 @@
         button:hover {
             opacity: 0.9;
         }
+
+        .login-button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <input type="text" id="username" placeholder="Benutzername">
+        <input type="password" id="password" placeholder="Passwort">
+        <button class="login-button" onclick="login()">Login</button>
+    </div>
+
     <div class="container">
         <h1>Minecraftserver</h1>
         <button id="start">Start</button>
@@ -67,20 +97,33 @@
     </div>
 
     <script>
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Beispiel-Benutzername und -Passwort
+            const correctUsername = 'admin';
+            const correctPassword = 'password';
+
+            if (username === correctUsername && password === correctPassword) {
+                document.querySelector('.login-container').style.display = 'none';
+                document.querySelector('.container').style.display = 'block';
+            } else {
+                alert('Falscher Benutzername oder Passwort');
+            }
+        }
+
         document.getElementById('start').addEventListener('click', function() {
-            // Dein Code zum Starten des Servers
             console.log('Starting');
             // Hier kannst du einen API-Aufruf hinzufügen, um den Server zu starten
         });
 
         document.getElementById('stop').addEventListener('click', function() {
-            // Dein Code zum Stoppen des Servers
             console.log('Stopping');
             // Hier kannst du einen API-Aufruf hinzufügen, um den Server zu stoppen
         });
 
         document.getElementById('restart').addEventListener('click', function() {
-            // Dein Code zum Neustarten des Servers
             console.log('Restarting');
             // Hier kannst du einen API-Aufruf hinzufügen, um den Server neu zu starten
         });
