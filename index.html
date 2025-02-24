@@ -11,25 +11,30 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .container {
-            text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: none; /* Initially hidden */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 0;
         }
 
-        .login-container {
+        .container, .login-container {
+            position: relative;
+            z-index: 1;
             text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         h1 {
@@ -38,22 +43,23 @@
         }
 
         input[type="text"], input[type="password"] {
-            padding: 10px;
-            margin: 10px;
-            width: 80%;
+            padding: 15px;
+            margin: 10px 0;
+            width: calc(100% - 30px);
             font-size: 16px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 8px;
+            box-sizing: border-box;
         }
 
         button {
-            padding: 10px 20px;
-            margin: 10px;
+            padding: 12px 24px;
+            margin: 10px 5px;
             font-size: 16px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         button#start {
@@ -72,6 +78,7 @@
         }
 
         button:hover {
+            transform: translateY(-2px);
             opacity: 0.9;
         }
 
@@ -79,17 +86,24 @@
             background-color: #4CAF50; /* Green */
             color: white;
         }
+
+        .error-message {
+            color: red;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
+    <div class="overlay"></div>
     <div class="login-container">
         <h1>Login</h1>
         <input type="text" id="username" placeholder="Benutzername">
         <input type="password" id="password" placeholder="Passwort">
         <button class="login-button" onclick="login()">Login</button>
+        <div class="error-message" id="error-message" style="display: none;">Falscher Benutzername oder Passwort</div>
     </div>
 
-    <div class="container">
+    <div class="container" style="display: none;">
         <h1>Minecraftserver</h1>
         <button id="start">Start</button>
         <button id="stop">Stop</button>
@@ -100,6 +114,7 @@
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
 
             // Beispiel-Benutzername und -Passwort
             const correctUsername = 'RowdyRoosters';
@@ -109,7 +124,7 @@
                 document.querySelector('.login-container').style.display = 'none';
                 document.querySelector('.container').style.display = 'block';
             } else {
-                alert('Falscher Benutzername oder Passwort');
+                errorMessage.style.display = 'block';
             }
         }
 
@@ -130,3 +145,4 @@
     </script>
 </body>
 </html>
+
