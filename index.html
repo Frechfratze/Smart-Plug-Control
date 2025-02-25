@@ -1,31 +1,216 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tapo Steuerung</title>
+    <title>Minecraftserver</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        button { font-size: 20px; padding: 10px 20px; margin: 10px; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 0;
+        }
+
+        .container, .login-container {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 15px;
+            margin: 10px 0;
+            width: calc(100% - 30px);
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 10px 5px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button#start {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+
+        button#stop {
+            background-color: #f44336; /* Red */
+            color: white;
+        }
+
+        button#restart {
+            background-color: #ff9800; /* Orange */
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .login-button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 15px;
+        }
+
+        .status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .status span {
+            margin-left: 10px;
+            font-size: 18px;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .online {
+            background-color: #4CAF50; /* Green */
+        }
+
+        .offline {
+            background-color: #f44336; /* Red */
+        }
     </style>
 </head>
 <body>
-    <h1>Tapo Smart Plug Steuerung</h1>
-    <button onclick="sendCommand('on')">Steckdose EIN</button>
-    <button onclick="sendCommand('off')">Steckdose AUS</button>
-    <p id="status"></p>
+    <div class="overlay"></div>
+    <div class="login-container">
+        <h1>Login</h1>
+        <input type="text" id="username" placeholder="Benutzername">
+        <input type="password" id="password" placeholder="Passwort">
+        <button class="login-button" onclick="loginCheck()">Login</button>
+        <div class="error-message" id="error-message" style="display: none;">Falscher Benutzername oder Passwort</div>
+    </div>
+
+    <div class="container" style="display: none;">
+        <div class="status">
+            <div id="status-icon" class="status-icon offline"></div>
+            <span id="status-text">Offline</span>
+        </div>
+        <h1>Minecraftserver</h1>
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <button id="restart">Restart</button>
+    </div>
 
     <script>
-        async function sendCommand(action) {
-            const response = await fetch("http://34.169.45.15:5000/control", { 
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: action })
-            });
+        // Konfigurationsparameter
+        const CONFIG = {
+            DEVICE_IP: 'deine-gerät-ip',      // Ersetze dies mit der IP-Adresse deines Shelly Plugs
+            WEB_USERNAME: 'RowdyRoosters',    // Benutzername für die Website-Anmeldung
+            WEB_PASSWORD: 'Fifi'              // Passwort für die Website-Anmeldung
+        };
 
+        async function controlDevice(command) {
+            const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.Set${command}`;
+            const response = await fetch(url, {
+                method: 'GET'
+            });
             const data = await response.json();
-            document.getElementById("status").innerText = data.status || data.error;
+            return data;
         }
+
+        async function checkStatus() {
+            try {
+                const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.GetStatus?id=0`;
+                const response = await fetch(url, {
+                    method: 'GET'
+                });
+                const result = await response.json();
+                if (result.switch0.output) {
+                    document.getElementById('status-icon').classList.remove('offline');
+                    document.getElementById('status-icon').classList.add('online');
+                    document.getElementById('status-text').innerText = 'Online';
+                } else {
+                    document.getElementById('status-icon').classList.remove('online');
+                    document.getElementById('status-icon').classList.add('offline');
+                    document.getElementById('status-text').innerText = 'Offline';
+                }
+            } catch (error) {
+                document.getElementById('status-icon').classList.remove('online');
+                document.getElementById('status-icon').classList.add('offline');
+                document.getElementById('status-text').innerText = 'Offline';
+            }
+        }
+
+        function loginCheck() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            if (username === CONFIG.WEB_USERNAME && password === CONFIG.WEB_PASSWORD) {
+                document.querySelector('.login-container').style.display = 'none';
+                document.querySelector('.container').style.display = 'block';
+                checkStatus(); // Status nach dem Login prüfen
+            } else {
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        document.getElementById('start').addEventListener('click', function () {
+            controlDevice('?id=0&on=true');
+            checkStatus();
+        });
+
+        document.getElementById('stop').addEventListener('click', function () {
+            controlDevice('?id=0&on=false');
+            checkStatus();
+        });
+
+        document.getElementById('restart').addEventListener('click', async function () {
+            await controlDevice('?id=0&on=false');
+            setTimeout(() => {
+                controlDevice('?id=0&on=true');
+                checkStatus();
+            }, 5000); // 5 Sekunden warten, bevor der Plug wieder eingeschaltet wird
+        });
     </script>
 </body>
 </html>
