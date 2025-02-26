@@ -155,6 +155,7 @@
     }
 
     const CONFIG = {
+      DEVICE_IP: "192.168.68.116",  // Bitte hier die korrekte IP deines Smart Plugs eintragen
       WEB_USERNAME: "3211db594d2c113a20ddc603efe2ef8c2382f393aed754840783a0bc63bb7be5",
       WEB_PASSWORD: "2ba1abe141836cc507e3694f97f715aa61deec4745981a085fe89939e83ec207"
     };
@@ -176,7 +177,7 @@
       }
     }
 
-    // Steuerung des Shelly Plug S
+    // Steuerung des Shelly Plug S (unverändert)
     async function schalteShelly(turnOn) {
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -200,29 +201,29 @@
       }
     }
 
-    // Überarbeiteter Status-Check:
-    // 1. Es wird versucht, den Status vom Smart Plug abzurufen.
-    //    - Bei Erfolg: Verbindung → Online (grün)
-    //    - Bei Fehler: Verbindung → Offline (rot)
-    // 2. Falls die Verbindung besteht, wird anhand von result.relays[0].ison geprüft,
-    //    ob der Smart Plug eingeschaltet (Gestartet, grün) oder ausgeschaltet (Gestoppt, rot) ist.
+    // Angepasster Status-Check anhand der Shelly Gen2‑Dokumentation:
+    // - Verbindung: Wird als online (grün) markiert, wenn der RPC-Aufruf an http://<DEVICE_IP>/rpc/Switch.GetStatus erfolgreich ist.
+    // - Betriebszustand: Das Feld "output" gibt an, ob der Plug eingeschaltet (true = Gestartet, grün) oder ausgeschaltet (false = Gestoppt, rot) ist.
     async function checkStatus() {
       try {
-        const response = await fetch("https://shelly-165-eu.shelly.cloud/device/status/?id=e465b85d8cd8");
+        const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.GetStatus`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ id: 0 })
+        });
         const result = await response.json();
         console.log("Statusabfrage:", result);
 
-        // Verbindung: Falls wir hier ankommen, ist eine Verbindung vorhanden → Online (grün)
+        // Verbindung erfolgreich → Online (grün)
         document.getElementById("status-icon").classList.remove("offline");
         document.getElementById("status-icon").classList.add("online");
         document.getElementById("status-text").innerText = "Online";
 
-        // Betriebszustand: Prüfe anhand des Wertes aus dem relays-Array
-        let isOn = false;
-        if(result.relays && result.relays.length > 0) {
-          isOn = result.relays[0].ison;
-        }
-        if(isOn === true || isOn === "on") {
+        // Betriebszustand prüfen: result.output sollte true/false sein
+        if (result.output === true) {
           document.getElementById("operation-icon").classList.remove("stopped");
           document.getElementById("operation-icon").classList.add("started");
           document.getElementById("operation-text").innerText = "Gestartet";
@@ -233,7 +234,7 @@
         }
       } catch (error) {
         console.error("Fehler beim Status-Check:", error);
-        // Bei Fehlern wird angenommen, dass keine Verbindung besteht
+        // Bei Fehlern wird angenommen, dass keine Verbindung besteht → Offline und Gestoppt
         document.getElementById("status-icon").classList.remove("online");
         document.getElementById("status-icon").classList.add("offline");
         document.getElementById("status-text").innerText = "Offline";
@@ -244,7 +245,7 @@
       }
     }
 
-    // Button-Aktionen
+    // Button-Aktionen (unverändert)
     document.getElementById("start").addEventListener("click", async function() {
       await schalteShelly(true);
       setTimeout(checkStatus, 1000);
@@ -255,4 +256,13 @@
       setTimeout(checkStatus, 1000);
     });
 
-    document.getElementById("restart").addEventListener("click", async functi
+    document.getElementById("restart").addEventListener("click", async function() {
+      await schalteShelly(false);
+      setTimeout(async () => {
+        await schalteShelly(true);
+        checkStatus();
+      }, 15000);
+    });
+  </script>
+</body>
+</html>
