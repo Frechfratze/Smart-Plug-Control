@@ -16,7 +16,6 @@
             background-position: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         .overlay {
             position: absolute;
             top: 0;
@@ -26,7 +25,6 @@
             background: rgba(0, 0, 0, 0.6);
             z-index: 0;
         }
-
         .container,
         .login-container {
             position: relative;
@@ -37,12 +35,10 @@
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-
         h1 {
             margin-bottom: 20px;
             color: #333;
         }
-
         input[type="text"],
         input[type="password"] {
             padding: 15px;
@@ -53,7 +49,6 @@
             border-radius: 8px;
             box-sizing: border-box;
         }
-
         button {
             padding: 12px 24px;
             margin: 10px 5px;
@@ -63,59 +58,48 @@
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-
         button#start {
             background-color: #4caf50;
             color: white;
         }
-
         button#stop {
             background-color: #f44336;
             color: white;
         }
-
         button#restart {
             background-color: #ff9800;
             color: white;
         }
-
         button:hover {
             transform: translateY(-2px);
             opacity: 0.9;
         }
-
         .login-button {
             background-color: #4caf50;
             color: white;
         }
-
         .error-message {
             color: red;
             margin-top: 15px;
         }
-
         .status {
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 20px;
         }
-
         .status span {
             margin-left: 10px;
             font-size: 18px;
         }
-
         .status-icon {
             width: 20px;
             height: 20px;
             border-radius: 50%;
         }
-
         .online {
             background-color: #4caf50;
         }
-
         .offline {
             background-color: #f44336;
         }
@@ -145,7 +129,7 @@
     </div>
 
     <script>
-        // Hilfsfunktion zum Berechnen des SHA-256 Hashes (Hex-String)
+        // Funktion zum Berechnen des SHA-256 Hashes (Hex-String)
         async function sha256(message) {
             const msgBuffer = new TextEncoder().encode(message);
             const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
@@ -155,12 +139,12 @@
         }
 
         const CONFIG = {
-            DEVICE_IP: "192.168.68.116",
+            DEVICE_IP: "192.168.68.116",  // IP-Adresse deines Shelly Plus Plug S
             WEB_USERNAME: "3211db594d2c113a20ddc603efe2ef8c2382f393aed754840783a0bc63bb7be5",
             WEB_PASSWORD: "2ba1abe141836cc507e3694f97f715aa61deec4745981a085fe89939e83ec207"
         };
 
-        // Asynchrone Login-Prüfung: Es wird der eingegebene Benutzername/Passwort gehasht und mit den gespeicherten Werten verglichen.
+        // Login-Prüfung: Eingabe wird gehasht und mit den vordefinierten Werten verglichen
         async function loginCheck() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
@@ -171,29 +155,51 @@
             if (hashedUsername === CONFIG.WEB_USERNAME && hashedPassword === CONFIG.WEB_PASSWORD) {
                 document.querySelector(".login-container").style.display = "none";
                 document.querySelector(".container").style.display = "block";
-                checkStatus(); // Status nach dem Login prüfen
+                checkStatus(); // Status nach erfolgreichem Login prüfen
             } else {
                 errorMessage.style.display = "block";
             }
         }
 
-        async function controlDevice(command) {
-            const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.Set${command}`;
-            const response = await fetch(url, {
-                method: "GET"
-            });
-            const data = await response.json();
-            return data;
+        // Funktion zum Schalten des Shelly Plus Plug S (an/aus)
+        async function controlDevice(state) {
+            const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.Set`;
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                        // Falls eine Authentifizierung nötig ist, den Header hier ergänzen:
+                        // "Authorization": "Basic " + btoa("Benutzername:Passwort")
+                    },
+                    body: JSON.stringify({
+                        id: 0,
+                        on: state
+                    })
+                });
+                const data = await response.json();
+                console.log("controlDevice response:", data);
+                return data;
+            } catch (error) {
+                console.error("Fehler bei controlDevice:", error);
+            }
         }
 
+        // Funktion zum Abfragen des aktuellen Status
         async function checkStatus() {
             try {
-                const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.GetStatus?id=0`;
+                const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.GetStatus`;
                 const response = await fetch(url, {
-                    method: "GET"
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ id: 0 })
                 });
                 const result = await response.json();
-                if (result.switch0.output) {
+                console.log("checkStatus result:", result);
+
+                if (result.output) {
                     document.getElementById("status-icon").classList.remove("offline");
                     document.getElementById("status-icon").classList.add("online");
                     document.getElementById("status-text").innerText = "Online";
@@ -203,29 +209,32 @@
                     document.getElementById("status-text").innerText = "Offline";
                 }
             } catch (error) {
+                console.error("Fehler beim Status-Check:", error);
                 document.getElementById("status-icon").classList.remove("online");
                 document.getElementById("status-icon").classList.add("offline");
                 document.getElementById("status-text").innerText = "Offline";
             }
         }
 
-        document.getElementById("start").addEventListener("click", function() {
-            controlDevice("?id=0&on=true");
-            checkStatus();
+        // Event-Listener für die Buttons
+        document.getElementById("start").addEventListener("click", async function() {
+            await controlDevice(true);
+            setTimeout(checkStatus, 1000);
         });
 
-        document.getElementById("stop").addEventListener("click", function() {
-            controlDevice("?id=0&on=false");
-            checkStatus();
+        document.getElementById("stop").addEventListener("click", async function() {
+            await controlDevice(false);
+            setTimeout(checkStatus, 1000);
         });
 
         document.getElementById("restart").addEventListener("click", async function() {
-            await controlDevice("?id=0&on=false");
-            setTimeout(() => {
-                controlDevice("?id=0&on=true");
+            await controlDevice(false);
+            setTimeout(async () => {
+                await controlDevice(true);
                 checkStatus();
-            }, 5000); // 5 Sekunden warten, bevor der Plug wieder eingeschaltet wird
+            }, 5000); // 5 Sekunden warten
         });
     </script>
 </body>
 </html>
+
