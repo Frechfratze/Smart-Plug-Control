@@ -6,14 +6,13 @@
     <title>Minecraftserver</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: table;
+            width: 100%;
             height: 100vh;
             margin: 0;
             background-image: url('https://steamuserimages-a.akamaihd.net/ugc/803242059817520747/FA02A3A5A67C9FBBC1E6E356638A6EDA7D752005/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false');
             background-size: cover;
-            background-position: center;
+            background-position: 50% 50%; /* Fallback für IE */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
@@ -27,10 +26,10 @@
             z-index: 0;
         }
 
-        .container, .login-container {
-            position: relative;
-            z-index: 1;
-            text-align: center;
+        .container, .login-container, .status {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center; /* Zentriert Text in IE */
             background: rgba(255, 255, 255, 0.9);
             padding: 40px;
             border-radius: 12px;
@@ -92,13 +91,6 @@
             margin-top: 15px;
         }
 
-        .status {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
         .status span {
             margin-left: 10px;
             font-size: 18px;
@@ -125,7 +117,7 @@
         <h1>Login</h1>
         <input type="text" id="username" placeholder="Benutzername">
         <input type="password" id="password" placeholder="Passwort">
-        <button class="login-button" onclick="loginCheck()">Login</button>
+        <button type="button" class="login-button" onclick="loginCheck()">Login</button> <!-- added type="button" to ensure it is a button -->
         <div class="error-message" id="error-message" style="display: none;">Falscher Benutzername oder Passwort</div>
     </div>
 
@@ -135,98 +127,102 @@
             <span id="status-text">Offline</span>
         </div>
         <h1>Minecraftserver</h1>
-        <button id="start">Start</button>
-        <button id="stop">Stop</button>
-        <button id="restart">Restart</button>
+        <button type="button" id="start">Start</button> <!-- added type="button" to ensure it is a button -->
+        <button type="button" id="stop">Stop</button> <!-- added type="button" to ensure it is a button -->
+        <button type="button" id="restart">Restart</button> <!-- added type="button" to ensure it is a button -->
     </div>
 
     <script>
         // SHA-256 Implementierung in JavaScript
         function sha256(ascii) {
-            var mathPow = Math.pow;
-            var maxWord = mathPow(2, 32);
-            var lengthProperty = 'length';
-            var i, j; // Used as a counter across the whole file
-            var result = '';
+            try {
+                var mathPow = Math.pow;
+                var maxWord = mathPow(2, 32);
+                var lengthProperty = 'length';
+                var i, j; // Used as a counter across the whole file
+                var result = '';
 
-            var words = [];
-            var asciiBitLength = ascii[lengthProperty] * 8;
+                var words = [];
+                var asciiBitLength = ascii[lengthProperty] * 8;
 
-            // Caching results is optional - remove/add slash from front of this line to toggle
-            // var hash = sha256.h = sha256.h || [];
-            // var k = sha256.k = sha256.k || [];
-            var hash = [], k = [];
+                // Caching results is optional - remove/add slash from front of this line to toggle
+                // var hash = sha256.h = sha256.h || [];
+                // var k = sha256.k = sha256.k || [];
+                var hash = [], k = [];
 
-            var primeCounter = k[lengthProperty];
-            // var hash = [], k = [];
-            // var primeCounter = 0;
+                var primeCounter = k[lengthProperty];
+                // var hash = [], k = [];
+                // var primeCounter = 0;
 
-            var isComposite = {};
-            for (var candidate = 2; primeCounter < 64; candidate++) {
-                if (!isComposite[candidate]) {
-                    for (i = 0; i < 313; i += candidate) {
-                        isComposite[i] = candidate;
+                var isComposite = {};
+                for (var candidate = 2; primeCounter < 64; candidate++) {
+                    if (!isComposite[candidate]) {
+                        for (i = 0; i < 313; i += candidate) {
+                            isComposite[i] = candidate;
+                        }
+                        hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+                        k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
                     }
-                    hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
-                    k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
                 }
-            }
 
-            ascii += '\x80'; // Append Ƈ' bit (plus zero padding)
-            while (ascii[lengthProperty] % 64 - 56) ascii += '\x00'; // More zero padding
-            for (i = 0; i < ascii[lengthProperty]; i++) {
-                j = ascii.charCodeAt(i);
-                if (j >> 8) return; // ASCII check: only accept characters in range 0-255
-                words[i >> 2] |= j << ((3 - i) % 4) * 8;
-            }
-            words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
-            words[words[lengthProperty]] = (asciiBitLength);
+                ascii += '\x80'; // Append Ƈ' bit (plus zero padding)
+                while (ascii[lengthProperty] % 64 - 56) ascii += '\x00'; // More zero padding
+                for (i = 0; i < ascii[lengthProperty]; i++) {
+                    j = ascii.charCodeAt(i);
+                    if (j >> 8) return; // ASCII check: only accept characters in range 0-255
+                    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+                }
+                words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+                words[words[lengthProperty]] = (asciiBitLength);
 
-            for (j = 0; j < words[lengthProperty];) {
-                var w = words.slice(j, j += 16); // The message is expanded into 64 words as part of the iteration
-                var oldHash = hash;
-                // This is now the "working hash", often labelled as variables a...g
-                hash = hash.slice(0, 8);
+                for (j = 0; j < words[lengthProperty];) {
+                    var w = words.slice(j, j += 16); // The message is expanded into 64 words as part of the iteration
+                    var oldHash = hash;
+                    // This is now the "working hash", often labelled as variables a...g
+                    hash = hash.slice(0, 8);
 
-                for (i = 0; i < 64; i++) {
-                    var i2 = i + j;
-                    // Expand the message into 64 words
-                    // Used below if 
-                    var w15 = w[i - 15], w2 = w[i - 2];
+                    for (i = 0; i < 64; i++) {
+                        var i2 = i + j;
+                        // Expand the message into 64 words
+                        // Used below if 
+                        var w15 = w[i - 15], w2 = w[i - 2];
 
-                    // Iterate
-                    var a = hash[0], e = hash[4];
-                    var temp1 = hash[7]
-                        + (e >> 6 | e << 26) ^ (e >> 11 | e << 21) ^ (e >> 25 | e << 7) // Σ1
-                        + ((e & hash[5]) ^ ((~e) & hash[6])) // Ch
-                        + k[i]
-                        // Expand the message schedule if needed
-                        + (w[i] = (i < 16) ? w[i] : (
-                            w[i - 16]
-                            + (w15 >> 7 | w15 << 25) ^ (w15 >> 18 | w15 << 14) ^ (w15 >>> 3) // σ0
-                            + w[i - 7]
-                            + (w2 >> 17 | w2 << 15) ^ (w2 >> 19 | w2 << 13) ^ (w2 >>> 10) // σ1
-                        ) | 0);
-                    // This is only used once, so *could* be moved below, but it only saves 4 bytes and makes things unreadble
-                    var temp2 = (a >> 2 | a << 30) ^ (a >> 13 | a << 19) ^ (a >> 22 | a << 10) // Σ0
-                        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2])); // Maj
+                        // Iterate
+                        var a = hash[0], e = hash[4];
+                        var temp1 = hash[7]
+                            + (e >> 6 | e << 26) ^ (e >> 11 | e << 21) ^ (e >> 25 | e << 7) // Σ1
+                            + ((e & hash[5]) ^ ((~e) & hash[6])) // Ch
+                            + k[i]
+                            // Expand the message schedule if needed
+                            + (w[i] = (i < 16) ? w[i] : (
+                                w[i - 16]
+                                + (w15 >> 7 | w15 << 25) ^ (w15 >> 18 | w15 << 14) ^ (w15 >>> 3) // σ0
+                                + w[i - 7]
+                                + (w2 >> 17 | w2 << 15) ^ (w2 >> 19 | w2 << 13) ^ (w2 >>> 10) // σ1
+                            ) | 0);
+                        // This is only used once, so *could* be moved below, but it only saves 4 bytes and makes things unreadble
+                        var temp2 = (a >> 2 | a << 30) ^ (a >> 13 | a << 19) ^ (a >> 22 | a << 10) // Σ0
+                            + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2])); // Maj
 
-                    hash = [(temp1 + temp2) | 0].concat(hash); // We don't bother splitting two assignments
-                    hash[4] = (hash[4] + temp1) | 0;
+                        hash = [(temp1 + temp2) | 0].concat(hash); // We don't bother splitting two assignments
+                        hash[4] = (hash[4] + temp1) | 0;
+                    }
+
+                    for (i = 0; i < 8; i++) {
+                        hash[i] = (hash[i] + oldHash[i]) | 0;
+                    }
                 }
 
                 for (i = 0; i < 8; i++) {
-                    hash[i] = (hash[i] + oldHash[i]) | 0;
+                    for (j = 3; j + 1; j--) {
+                        var b = (hash[i] >> (j * 8)) & 255;
+                        result += ((b < 16) ? 0 : '') + b.toString(16);
+                    }
                 }
+                return result;
+            } catch (error) {
+                console.error("Error in sha256 function: ", error);
             }
-
-            for (i = 0; i < 8; i++) {
-                for (j = 3; j + 1; j--) {
-                    var b = (hash[i] >> (j * 8)) & 255;
-                    result += ((b < 16) ? 0 : '') + b.toString(16);
-                }
-            }
-            return result;
         }
 
         // Konfigurationsparameter
@@ -265,20 +261,34 @@
                 document.getElementById('status-icon').classList.remove('online');
                 document.getElementById('status-icon').classList.add('offline');
                 document.getElementById('status-text').innerText = 'Offline';
+                console.error("Error in checkStatus function: ", error);
             }
         }
 
         function loginCheck() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
+            try {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const errorMessage = document.getElementById('error-message');
 
-            if (sha256(username) === CONFIG.WEB_USERNAME_HASH && sha256(password) === CONFIG.WEB_PASSWORD_HASH) {
-                document.querySelector('.login-container').style.display = 'none';
-                document.querySelector('.container').style.display = 'block';
-                checkStatus(); // Status nach dem Login prüfen
-            } else {
-                errorMessage.style.display = 'block';
+                // Debugging: Print the hashes for entered values
+                console.log("Entered Username: ", username);
+                console.log("Entered Username Hash: ", sha256(username));
+                console.log("Expected Username Hash: ", CONFIG.WEB_USERNAME_HASH);
+
+                console.log("Entered Password: ", password);
+                console.log("Entered Password Hash: ", sha256(password));
+                console.log("Expected Password Hash: ", CONFIG.WEB_PASSWORD_HASH);
+
+                if (sha256(username) === CONFIG.WEB_USERNAME_HASH && sha256(password) === CONFIG.WEB_PASSWORD_HASH) {
+                    document.querySelector('.login-container').style.display = 'none';
+                    document.querySelector('.container').style.display = 'block';
+                    checkStatus(); // Status nach dem Login prüfen
+                } else {
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Error in loginCheck function: ", error);
             }
         }
 
@@ -302,4 +312,3 @@
     </script>
 </body>
 </html>
-
