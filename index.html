@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minecraftserver</title>
     <style>
         body {
@@ -27,7 +27,8 @@
             z-index: 0;
         }
 
-        .container, .login-container {
+        .container,
+        .login-container {
             position: relative;
             z-index: 1;
             text-align: center;
@@ -42,7 +43,8 @@
             color: #333;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="text"],
+        input[type="password"] {
             padding: 15px;
             margin: 10px 0;
             width: calc(100% - 30px);
@@ -63,17 +65,17 @@
         }
 
         button#start {
-            background-color: #4CAF50; /* Green */
+            background-color: #4caf50;
             color: white;
         }
 
         button#stop {
-            background-color: #f44336; /* Red */
+            background-color: #f44336;
             color: white;
         }
 
         button#restart {
-            background-color: #ff9800; /* Orange */
+            background-color: #ff9800;
             color: white;
         }
 
@@ -83,7 +85,7 @@
         }
 
         .login-button {
-            background-color: #4CAF50; /* Green */
+            background-color: #4caf50;
             color: white;
         }
 
@@ -111,11 +113,11 @@
         }
 
         .online {
-            background-color: #4CAF50; /* Green */
+            background-color: #4caf50;
         }
 
         .offline {
-            background-color: #f44336; /* Red */
+            background-color: #f44336;
         }
     </style>
 </head>
@@ -123,10 +125,12 @@
     <div class="overlay"></div>
     <div class="login-container">
         <h1>Login</h1>
-        <input type="text" id="username" placeholder="Benutzername">
-        <input type="password" id="password" placeholder="Passwort">
+        <input type="text" id="username" placeholder="Benutzername" />
+        <input type="password" id="password" placeholder="Passwort" />
         <button class="login-button" onclick="loginCheck()">Login</button>
-        <div class="error-message" id="error-message" style="display: none;">Falscher Benutzername oder Passwort</div>
+        <div class="error-message" id="error-message" style="display: none;">
+            Falscher Benutzername oder Passwort
+        </div>
     </div>
 
     <div class="container" style="display: none;">
@@ -141,17 +145,50 @@
     </div>
 
     <script>
-        // Konfigurationsparameter
+        // Hilfsfunktion zum Berechnen des SHA-256 Hashes (Hex-String)
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+            return hashHex;
+        }
+
+        // Konfiguration: Ersetze die folgenden Platzhalter durch die per SHA-256 berechneten Hashes!
+        // Beispiel:
+        // Öffne in der Browser-Konsole einmal folgenden Code:
+        // sha256("RowdyRoosters").then(console.log);
+        // sha256("Fifi").then(console.log);
+        // und ersetze anschließend die Werte unten.
         const CONFIG = {
-            DEVICE_IP: 'deine-gerät-ip',      // Ersetze dies mit der IP-Adresse deines Shelly Plugs
-            WEB_USERNAME: 'RowdyRoosters',    // Benutzername für die Website-Anmeldung
-            WEB_PASSWORD: 'Fifi'              // Passwort für die Website-Anmeldung
+            DEVICE_IP: "deine-gerät-ip",
+            // SHA-256 Hash von "RowdyRoosters"
+            WEB_USERNAME: "FILL_IN_SHA256_HASH_OF_RowdyRoosters",
+            // SHA-256 Hash von "Fifi"
+            WEB_PASSWORD: "FILL_IN_SHA256_HASH_OF_Fifi"
         };
+
+        // Asynchrone Login-Prüfung: Es wird der eingegebene Benutzername/Passwort gehasht und mit den gespeicherten Werten verglichen.
+        async function loginCheck() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const hashedUsername = await sha256(username);
+            const hashedPassword = await sha256(password);
+            const errorMessage = document.getElementById("error-message");
+
+            if (hashedUsername === CONFIG.WEB_USERNAME && hashedPassword === CONFIG.WEB_PASSWORD) {
+                document.querySelector(".login-container").style.display = "none";
+                document.querySelector(".container").style.display = "block";
+                checkStatus(); // Status nach dem Login prüfen
+            } else {
+                errorMessage.style.display = "block";
+            }
+        }
 
         async function controlDevice(command) {
             const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.Set${command}`;
             const response = await fetch(url, {
-                method: 'GET'
+                method: "GET"
             });
             const data = await response.json();
             return data;
@@ -161,53 +198,39 @@
             try {
                 const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.GetStatus?id=0`;
                 const response = await fetch(url, {
-                    method: 'GET'
+                    method: "GET"
                 });
                 const result = await response.json();
                 if (result.switch0.output) {
-                    document.getElementById('status-icon').classList.remove('offline');
-                    document.getElementById('status-icon').classList.add('online');
-                    document.getElementById('status-text').innerText = 'Online';
+                    document.getElementById("status-icon").classList.remove("offline");
+                    document.getElementById("status-icon").classList.add("online");
+                    document.getElementById("status-text").innerText = "Online";
                 } else {
-                    document.getElementById('status-icon').classList.remove('online');
-                    document.getElementById('status-icon').classList.add('offline');
-                    document.getElementById('status-text').innerText = 'Offline';
+                    document.getElementById("status-icon").classList.remove("online");
+                    document.getElementById("status-icon").classList.add("offline");
+                    document.getElementById("status-text").innerText = "Offline";
                 }
             } catch (error) {
-                document.getElementById('status-icon').classList.remove('online');
-                document.getElementById('status-icon').classList.add('offline');
-                document.getElementById('status-text').innerText = 'Offline';
+                document.getElementById("status-icon").classList.remove("online");
+                document.getElementById("status-icon").classList.add("offline");
+                document.getElementById("status-text").innerText = "Offline";
             }
         }
 
-        function loginCheck() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
-
-            if (username === CONFIG.WEB_USERNAME && password === CONFIG.WEB_PASSWORD) {
-                document.querySelector('.login-container').style.display = 'none';
-                document.querySelector('.container').style.display = 'block';
-                checkStatus(); // Status nach dem Login prüfen
-            } else {
-                errorMessage.style.display = 'block';
-            }
-        }
-
-        document.getElementById('start').addEventListener('click', function () {
-            controlDevice('?id=0&on=true');
+        document.getElementById("start").addEventListener("click", function() {
+            controlDevice("?id=0&on=true");
             checkStatus();
         });
 
-        document.getElementById('stop').addEventListener('click', function () {
-            controlDevice('?id=0&on=false');
+        document.getElementById("stop").addEventListener("click", function() {
+            controlDevice("?id=0&on=false");
             checkStatus();
         });
 
-        document.getElementById('restart').addEventListener('click', async function () {
-            await controlDevice('?id=0&on=false');
+        document.getElementById("restart").addEventListener("click", async function() {
+            await controlDevice("?id=0&on=false");
             setTimeout(() => {
-                controlDevice('?id=0&on=true');
+                controlDevice("?id=0&on=true");
                 checkStatus();
             }, 5000); // 5 Sekunden warten, bevor der Plug wieder eingeschaltet wird
         });
