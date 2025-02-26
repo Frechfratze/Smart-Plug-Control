@@ -1,240 +1,227 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Minecraftserver</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-image: url('https://steamuserimages-a.akamaihd.net/ugc/803242059817520747/FA02A3A5A67C9FBBC1E6E356638A6EDA7D752005/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false');
-            background-size: cover;
-            background-position: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 0;
-        }
-        .container,
-        .login-container {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        input[type="text"],
-        input[type="password"] {
-            padding: 15px;
-            margin: 10px 0;
-            width: calc(100% - 30px);
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
-        button {
-            padding: 12px 24px;
-            margin: 10px 5px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        button#start {
-            background-color: #4caf50;
-            color: white;
-        }
-        button#stop {
-            background-color: #f44336;
-            color: white;
-        }
-        button#restart {
-            background-color: #ff9800;
-            color: white;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-        .login-button {
-            background-color: #4caf50;
-            color: white;
-        }
-        .error-message {
-            color: red;
-            margin-top: 15px;
-        }
-        .status {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .status span {
-            margin-left: 10px;
-            font-size: 18px;
-        }
-        .status-icon {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-        }
-        .online {
-            background-color: #4caf50;
-        }
-        .offline {
-            background-color: #f44336;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minecraftserver</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url('https://steamuserimages-a.akamaihd.net/ugc/803242059817520747/FA02A3A5A67C9FBBC1E6E356638A6EDA7D752005/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false');
+      background-size: cover;
+      background-position: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 0;
+    }
+    .container,
+    .login-container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    input[type="text"],
+    input[type="password"] {
+      padding: 15px;
+      margin: 10px 0;
+      width: calc(100% - 30px);
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 12px 24px;
+      margin: 10px 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button#start {
+      background-color: #4caf50;
+      color: white;
+    }
+    button#stop {
+      background-color: #f44336;
+      color: white;
+    }
+    button#restart {
+      background-color: #ff9800;
+      color: white;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+    .login-button {
+      background-color: #4caf50;
+      color: white;
+    }
+    .error-message {
+      color: red;
+      margin-top: 15px;
+    }
+    .status {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .status span {
+      margin-left: 10px;
+      font-size: 18px;
+    }
+    .status-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    .online {
+      background-color: #4caf50;
+    }
+    .offline {
+      background-color: #f44336;
+    }
+  </style>
 </head>
 <body>
-    <div class="overlay"></div>
-    <div class="login-container">
-        <h1>Login</h1>
-        <input type="text" id="username" placeholder="Benutzername" />
-        <input type="password" id="password" placeholder="Passwort" />
-        <button class="login-button" onclick="loginCheck()">Login</button>
-        <div class="error-message" id="error-message" style="display: none;">
-            Falscher Benutzername oder Passwort
-        </div>
+  <div class="overlay"></div>
+  
+  <!-- Login-Bereich -->
+  <div class="login-container">
+    <h1>Login</h1>
+    <input type="text" id="username" placeholder="Benutzername" />
+    <input type="password" id="password" placeholder="Passwort" />
+    <button class="login-button" onclick="loginCheck()">Login</button>
+    <div class="error-message" id="error-message" style="display: none;">
+      Falscher Benutzername oder Passwort
     </div>
+  </div>
 
-    <div class="container" style="display: none;">
-        <div class="status">
-            <div id="status-icon" class="status-icon offline"></div>
-            <span id="status-text">Offline</span>
-        </div>
-        <h1>Minecraftserver</h1>
-        <button id="start">Start</button>
-        <button id="stop">Stop</button>
-        <button id="restart">Restart</button>
+  <!-- Hauptbereich -->
+  <div class="container" style="display: none;">
+    <div class="status">
+      <div id="status-icon" class="status-icon offline"></div>
+      <span id="status-text">Offline</span>
     </div>
+    <h1>Minecraftserver</h1>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <button id="restart">Restart</button>
+  </div>
 
-    <script>
-        // Funktion zum Berechnen des SHA-256 Hashes (Hex-String)
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-            return hashHex;
-        }
+  <script>
+    // Funktion zum Berechnen des SHA-256 Hashes (Hex-String)
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+      return hashHex;
+    }
 
-        const CONFIG = {
-            DEVICE_IP: "192.168.68.116",  // IP-Adresse deines Shelly Plus Plug S
-            WEB_USERNAME: "3211db594d2c113a20ddc603efe2ef8c2382f393aed754840783a0bc63bb7be5",
-            WEB_PASSWORD: "2ba1abe141836cc507e3694f97f715aa61deec4745981a085fe89939e83ec207"
-        };
+    const CONFIG = {
+      // Diese Werte sollten die Hashes für Benutzername und Passwort sein
+      WEB_USERNAME: "3211db594d2c113a20ddc603efe2ef8c2382f393aed754840783a0bc63bb7be5",
+      WEB_PASSWORD: "2ba1abe141836cc507e3694f97f715aa61deec4745981a085fe89939e83ec207"
+    };
 
-        // Login-Prüfung: Eingabe wird gehasht und mit den vordefinierten Werten verglichen
-        async function loginCheck() {
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const hashedUsername = await sha256(username);
-            const hashedPassword = await sha256(password);
-            const errorMessage = document.getElementById("error-message");
+    // Login-Prüfung
+    async function loginCheck() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const hashedUsername = await sha256(username);
+      const hashedPassword = await sha256(password);
+      const errorMessage = document.getElementById("error-message");
 
-            if (hashedUsername === CONFIG.WEB_USERNAME && hashedPassword === CONFIG.WEB_PASSWORD) {
-                document.querySelector(".login-container").style.display = "none";
-                document.querySelector(".container").style.display = "block";
-                checkStatus(); // Status nach erfolgreichem Login prüfen
-            } else {
-                errorMessage.style.display = "block";
-            }
-        }
+      if (hashedUsername === CONFIG.WEB_USERNAME && hashedPassword === CONFIG.WEB_PASSWORD) {
+        document.querySelector(".login-container").style.display = "none";
+        document.querySelector(".container").style.display = "block";
+        checkStatus();
+      } else {
+        errorMessage.style.display = "block";
+      }
+    }
 
-        // Funktion zum Schalten des Shelly Plus Plug S (an/aus)
-        async function controlDevice(state) {
-            const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.Set`;
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                        // Falls eine Authentifizierung nötig ist, den Header hier ergänzen:
-                        // "Authorization": "Basic " + btoa("Benutzername:Passwort")
-                    },
-                    body: JSON.stringify({
-                        id: 0,
-                        on: state
-                    })
-                });
-                const data = await response.json();
-                console.log("controlDevice response:", data);
-                return data;
-            } catch (error) {
-                console.error("Fehler bei controlDevice:", error);
-            }
-        }
+    // Funktion zur Steuerung des Shelly Plug S
+    async function schalteShelly(turnOn) {
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
-        // Funktion zum Abfragen des aktuellen Status
-        async function checkStatus() {
-            try {
-                const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.GetStatus`;
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ id: 0 })
-                });
-                const result = await response.json();
-                console.log("checkStatus result:", result);
+      const raw = `id=e465b85d8cd8&turn=${turnOn ? "on" : "off"}&channel=0&auth_key=MmU4OTRmdWlk4A4D429C1AEBBB620E5AA56C8C7E4BE74451AEA01AF818193E6B1FDBB5535AEE6C59824916283299`;
 
-                if (result.output) {
-                    document.getElementById("status-icon").classList.remove("offline");
-                    document.getElementById("status-icon").classList.add("online");
-                    document.getElementById("status-text").innerText = "Online";
-                } else {
-                    document.getElementById("status-icon").classList.remove("online");
-                    document.getElementById("status-icon").classList.add("offline");
-                    document.getElementById("status-text").innerText = "Offline";
-                }
-            } catch (error) {
-                console.error("Fehler beim Status-Check:", error);
-                document.getElementById("status-icon").classList.remove("online");
-                document.getElementById("status-icon").classList.add("offline");
-                document.getElementById("status-text").innerText = "Offline";
-            }
-        }
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow"
+      };
 
-        // Event-Listener für die Buttons
-        document.getElementById("start").addEventListener("click", async function() {
-            await controlDevice(true);
-            setTimeout(checkStatus, 1000);
-        });
+      try {
+        const response = await fetch("https://shelly-165-eu.shelly.cloud/device/relay/control/", requestOptions);
+        const data = await response.json();
+        console.log("Shelly Antwort:", data);
+        return data;
+      } catch (error) {
+        console.error("Fehler bei schalteShelly:", error);
+      }
+    }
 
-        document.getElementById("stop").addEventListener("click", async function() {
-            await controlDevice(false);
-            setTimeout(checkStatus, 1000);
-        });
+    // Funktion zum Abfragen des aktuellen Status (hier kannst du deine Logik ergänzen, falls der Shelly Plug Status abgefragt werden kann)
+    async function checkStatus() {
+      // Statusabfrage kann je nach Gerät und API unterschiedlich implementiert werden.
+      // Hier ein Platzhalter, der den Status anhand einer erfolgreichen Anfrage ändern könnte.
+      // Falls keine Statusabfrage möglich ist, kann dieser Teil auch entfallen.
+      // Für dieses Beispiel setzen wir einfach den Status auf "Online", wenn zuletzt eingeschaltet wurde.
+      // Diesen Platzhalter kannst du durch die korrekte Statusabfrage ersetzen.
+      const statusIcon = document.getElementById("status-icon");
+      const statusText = document.getElementById("status-text");
+      // Beispiel: Wir gehen davon aus, dass "on" als Online gewertet wird.
+      statusIcon.classList.remove("offline");
+      statusIcon.classList.add("online");
+      statusText.innerText = "Online";
+    }
 
-        document.getElementById("restart").addEventListener("click", async function() {
-            await controlDevice(false);
-            setTimeout(async () => {
-                await controlDevice(true);
-                checkStatus();
-            }, 5000); // 5 Sekunden warten
-        });
-    </script>
+    // Event-Listener für die Buttons
+    document.getElementById("start").addEventListener("click", async function() {
+      await schalteShelly(true);
+      setTimeout(checkStatus, 1000);
+    });
+
+    document.getElementById("stop").addEventListener("click", async function() {
+      await schalteShelly(false);
+      setTimeout(checkStatus, 1000);
+    });
+
+    document.getElementById("restart").addEventListener("click", async function() {
+      // Ausschalten, 15 Sekunden warten, dann wieder einschalten
+      await schalteShelly(false);
+      setTimeout(async () => {
+        await schalteShelly(true);
+        checkStatus();
+      }, 15000);
+    });
+  </script>
 </body>
 </html>
-
