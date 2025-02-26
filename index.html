@@ -155,7 +155,6 @@
     }
 
     const CONFIG = {
-      // Diese Werte sollten die Hashes für Benutzername und Passwort sein
       WEB_USERNAME: "3211db594d2c113a20ddc603efe2ef8c2382f393aed754840783a0bc63bb7be5",
       WEB_PASSWORD: "2ba1abe141836cc507e3694f97f715aa61deec4745981a085fe89939e83ec207"
     };
@@ -177,7 +176,7 @@
       }
     }
 
-    // Funktion zur Steuerung des Shelly Plug S
+    // Steuerung des Shelly Plug S
     async function schalteShelly(turnOn) {
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -201,23 +200,20 @@
       }
     }
 
-    // Funktion zum Abfragen des aktuellen Status des Smart Plugs
+    // Statusabfrage: Hier prüfen wir nun result.ison statt result.turn.
     async function checkStatus() {
       try {
-        // Annahme: Es gibt einen Status-Endpunkt, der den aktuellen Zustand liefert.
-        // Passe die URL und die Logik (z.B. result.turn) an die tatsächliche API an.
         const response = await fetch("https://shelly-165-eu.shelly.cloud/device/relay/status/?id=e465b85d8cd8");
         const result = await response.json();
         console.log("Statusabfrage:", result);
-
-        // Beispielhafte Logik: Wir gehen davon aus, dass result.turn "on" bzw. true bedeutet,
-        // dass der Smart Plug aktiviert (gestartet) ist.
-        if(result.turn === "on" || result.turn === true) {
-          // Verbindungsstatus
+        
+        // Hier wird angenommen, dass result.ison den aktuellen Zustand wiedergibt:
+        if(result.ison === true) {
+          // Verbindungsstatus aktualisieren
           document.getElementById("status-icon").classList.remove("offline");
           document.getElementById("status-icon").classList.add("online");
           document.getElementById("status-text").innerText = "Online";
-          // Betriebsstatus
+          // Betriebsstatus aktualisieren
           document.getElementById("operation-icon").classList.remove("stopped");
           document.getElementById("operation-icon").classList.add("started");
           document.getElementById("operation-text").innerText = "Gestartet";
@@ -234,7 +230,7 @@
       }
     }
 
-    // Event-Listener für die Buttons
+    // Button-Aktionen
     document.getElementById("start").addEventListener("click", async function() {
       await schalteShelly(true);
       setTimeout(checkStatus, 1000);
@@ -246,7 +242,6 @@
     });
 
     document.getElementById("restart").addEventListener("click", async function() {
-      // Ausschalten, 15 Sekunden warten, dann wieder einschalten
       await schalteShelly(false);
       setTimeout(async () => {
         await schalteShelly(true);
