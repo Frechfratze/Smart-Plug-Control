@@ -200,20 +200,22 @@
       }
     }
 
-    // Statusabfrage: Hier prüfen wir nun result.ison statt result.turn.
+    // Angepasste Statusabfrage: Prüfe den Zustand aus dem "relays"-Array
     async function checkStatus() {
       try {
-        const response = await fetch("https://shelly-165-eu.shelly.cloud/device/relay/status/?id=e465b85d8cd8");
+        const response = await fetch("https://shelly-165-eu.shelly.cloud/device/status/?id=e465b85d8cd8");
         const result = await response.json();
         console.log("Statusabfrage:", result);
         
-        // Hier wird angenommen, dass result.ison den aktuellen Zustand wiedergibt:
-        if(result.ison === true) {
-          // Verbindungsstatus aktualisieren
+        let isOn = false;
+        if (result.relays && result.relays.length > 0) {
+          isOn = result.relays[0].ison;
+        }
+        
+        if (isOn === true || isOn === "on") {
           document.getElementById("status-icon").classList.remove("offline");
           document.getElementById("status-icon").classList.add("online");
           document.getElementById("status-text").innerText = "Online";
-          // Betriebsstatus aktualisieren
           document.getElementById("operation-icon").classList.remove("stopped");
           document.getElementById("operation-icon").classList.add("started");
           document.getElementById("operation-text").innerText = "Gestartet";
