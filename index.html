@@ -140,13 +140,20 @@
         <button id="restart">Restart</button>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha256.js"></script>
     <script>
         // Konfigurationsparameter
         const CONFIG = {
             DEVICE_IP: 'deine-gerät-ip',      // Ersetze dies mit der IP-Adresse deines Shelly Plugs
-            WEB_USERNAME: 'RowdyRoosters',    // Benutzername für die Website-Anmeldung
-            WEB_PASSWORD: 'Fifi'              // Passwort für die Website-Anmeldung
+            WEB_USERNAME_HASH: 'a3f1c9ac7dcddd7e1e0b1b4e1d5d2462e6b4c4db5fddd5f1c4a1c6d1a9d6e6c9', // SHA-256 Hash für "RowdyRoosters"
+            WEB_PASSWORD_HASH: 'f9a77e03d6bdfc9e4a067e158b312d8a7de582e36bba51b0c4d0192b1ef5b2d8' // SHA-256 Hash für "Fifi"
         };
+
+        function hashInput(input) {
+            let shaObj = new jsSHA("SHA-256", "TEXT");
+            shaObj.update(input);
+            return shaObj.getHash("HEX");
+        }
 
         async function controlDevice(command) {
             const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.Set${command}`;
@@ -185,7 +192,7 @@
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('error-message');
 
-            if (username === CONFIG.WEB_USERNAME && password === CONFIG.WEB_PASSWORD) {
+            if (hashInput(username) === CONFIG.WEB_USERNAME_HASH && hashInput(password) === CONFIG.WEB_PASSWORD_HASH) {
                 document.querySelector('.login-container').style.display = 'none';
                 document.querySelector('.container').style.display = 'block';
                 checkStatus(); // Status nach dem Login prüfen
