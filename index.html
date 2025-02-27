@@ -179,10 +179,10 @@
         // SYSTEMSTATUS PRÜFEN (ONLINE/OFFLINE)
         const systemStatusDiv = document.getElementById("systemStatus");
         if (data.data.online) {
-          systemStatusDiv.innerHTML = "Cloud Connection: 🟢 <b>Online</b>";
+          systemStatusDiv.innerHTML = "Cloud Status: 🟢 <b>Online</b>";
           systemStatusDiv.className = "status-container online";
         } else {
-          systemStatusDiv.innerHTML = "Cloud Connection: 🔴 <b>Offline</b>";
+          systemStatusDiv.innerHTML = "Cloud Status: 🔴 <b>Offline</b>";
           systemStatusDiv.className = "status-container offline";
         }
 
