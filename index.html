@@ -82,30 +82,23 @@
       color: red;
       margin-top: 15px;
     }
+    /* Die ursprüngliche .status-container wird hier genutzt, 
+       aber inhaltlich ersetzen wir ihn mit den zwei neuen Status-Divs */
     .status-container {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 20px;
+      font-size: 24px;
+      margin: 20px auto;
+      padding: 10px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+      border: 2px solid;
     }
-    .status {
-      display: flex;
-      align-items: center;
-    }
-    .status span {
-      margin-left: 10px;
-      font-size: 18px;
-    }
-    .status-icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-    }
-    .online, .started {
-      background-color: #4caf50;
-    }
-    .offline, .stopped {
-      background-color: #f44336;
-    }
+    /* Klassen für den Systemstatus */
+    .online { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+    .offline { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+    /* Klassen für den Schaltzustand */
+    .on { background-color: #cce5ff; color: #004085; border-color: #b8daff; }
+    .off { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
   </style>
 </head>
 <body>
@@ -124,19 +117,9 @@
 
   <!-- Hauptbereich -->
   <div class="container" style="display: none;">
-    <!-- Zwei Status-Anzeigen -->
-    <div class="status-container">
-      <!-- Erster Status: Verbindung -->
-      <div class="status">
-        <div id="status-icon" class="status-icon offline"></div>
-        <span id="status-text">Offline</span>
-      </div>
-      <!-- Zweiter Status: Betriebszustand (On/Off) -->
-      <div class="status">
-        <div id="operation-icon" class="status-icon stopped"></div>
-        <span id="operation-text">Gestoppt</span>
-      </div>
-    </div>
+    <!-- Status-Anzeigen basierend auf deinem Testcode -->
+    <div id="systemStatus" class="status-container">Systemstatus: <b>Lade...</b></div>
+    <div id="powerStatus" class="status-container">Schaltzustand: <b>Lade...</b></div>
     
     <h1>Minecraftserver</h1>
     <button id="start">Start</button>
@@ -171,13 +154,81 @@
       if (hashedUsername === CONFIG.WEB_USERNAME && hashedPassword === CONFIG.WEB_PASSWORD) {
         document.querySelector(".login-container").style.display = "none";
         document.querySelector(".container").style.display = "block";
-        checkStatus();
+        getShellyStatus();
       } else {
         errorMessage.style.display = "block";
       }
     }
 
-    // Steuerung des Shelly Plug S (unverändert)
+    // Implementierung der Statusabfrage aus deinem Testcode:
+    async function getShellyStatus() {
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+      const urlencoded = new URLSearchParams();
+      urlencoded.append("id", "e465b85d8cd8"); // Deine Device ID
+      urlencoded.append("auth_key", "MmU4OTRmdWlk4A4D429C1AEBBB620E5AA56C8C7E4BE74451AEA01AF818193E6B1FDBB5535AEE6C59824916283299"); // Dein API Key
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: urlencoded,
+        redirect: "follow"
+      };
+
+      try {
+        const response = await fetch("https://shelly-165-eu.shelly.cloud/device/status/", requestOptions);
+        const data = await response.json();
+        
+        // SYSTEMSTATUS PRÜFEN (ONLINE/OFFLINE)
+        const systemStatusDiv = document.getElementById("systemStatus");
+        if (data.data.online) {
+          systemStatusDiv.innerHTML = "Systemstatus: 🟢 <b>Online</b>";
+          systemStatusDiv.className = "status-container online";
+        } else {
+          systemStatusDiv.innerHTML = "Systemstatus: 🔴 <b>Offline</b>";
+          systemStatusDiv.className = "status-container offline";
+        }
+
+        // SCHALTZUSTAND PRÜFEN (ON/OFF)
+        const powerStatusDiv = document.getElementById("powerStatus");
+        if (data.data.device_status["switch:0"].output) {
+          powerStatusDiv.innerHTML = "Schaltzustand: ✅ <b>AN</b>";
+          powerStatusDiv.className = "status-container on";
+        } else {
+          powerStatusDiv.innerHTML = "Schaltzustand: ❌ <b>AUS</b>";
+          powerStatusDiv.className = "status-container off";
+        }
+      } catch (error) {
+        console.error("Fehler bei der Statusabfrage:", error);
+        document.getElementById("systemStatus").innerHTML = "Systemstatus: ❌ <b>Fehler</b>";
+        document.getElementById("powerStatus").innerHTML = "Schaltzustand: ❌ <b>Fehler</b>";
+      }
+    }
+
+    // Button-Aktionen (Status nach Steuerung aktualisieren)
+    document.getElementById("start").addEventListener("click", async function() {
+      await schalteShelly(true);
+      setTimeout(getShellyStatus, 1000);
+    });
+
+    document.getElementById("stop").addEventListener("click", async function() {
+      await schalteShelly(false);
+      setTimeout(getShellyStatus, 1000);
+    });
+
+    document.getElementById("restart").addEventListener("click", async function() {
+      await schalteShelly(false);
+      setTimeout(async () => {
+        await schalteShelly(true);
+        getShellyStatus();
+      }, 15000);
+    });
+
+    // Periodische Aktualisierung der Statusanzeige alle 5 Sekunden
+    setInterval(getShellyStatus, 5000);
+    
+    // Die bisherige Funktion schalteShelly bleibt unverändert
     async function schalteShelly(turnOn) {
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -200,69 +251,6 @@
         console.error("Fehler bei schalteShelly:", error);
       }
     }
-
-    // Angepasster Status-Check anhand der Shelly Gen2‑Dokumentation:
-    // - Verbindung: Wird als online (grün) markiert, wenn der RPC-Aufruf an http://<DEVICE_IP>/rpc/Switch.GetStatus erfolgreich ist.
-    // - Betriebszustand: Das Feld "output" gibt an, ob der Plug eingeschaltet (true = Gestartet, grün) oder ausgeschaltet (false = Gestoppt, rot) ist.
-    async function checkStatus() {
-      try {
-        const url = `http://${CONFIG.DEVICE_IP}/rpc/Switch.GetStatus`;
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ id: 0 })
-        });
-        const result = await response.json();
-        console.log("Statusabfrage:", result);
-
-        // Verbindung erfolgreich → Online (grün)
-        document.getElementById("status-icon").classList.remove("offline");
-        document.getElementById("status-icon").classList.add("online");
-        document.getElementById("status-text").innerText = "Online";
-
-        // Betriebszustand prüfen: result.output sollte true/false sein
-        if (result.output === true) {
-          document.getElementById("operation-icon").classList.remove("stopped");
-          document.getElementById("operation-icon").classList.add("started");
-          document.getElementById("operation-text").innerText = "Gestartet";
-        } else {
-          document.getElementById("operation-icon").classList.remove("started");
-          document.getElementById("operation-icon").classList.add("stopped");
-          document.getElementById("operation-text").innerText = "Gestoppt";
-        }
-      } catch (error) {
-        console.error("Fehler beim Status-Check:", error);
-        // Bei Fehlern wird angenommen, dass keine Verbindung besteht → Offline und Gestoppt
-        document.getElementById("status-icon").classList.remove("online");
-        document.getElementById("status-icon").classList.add("offline");
-        document.getElementById("status-text").innerText = "Offline";
-
-        document.getElementById("operation-icon").classList.remove("started");
-        document.getElementById("operation-icon").classList.add("stopped");
-        document.getElementById("operation-text").innerText = "Gestoppt";
-      }
-    }
-
-    // Button-Aktionen (unverändert)
-    document.getElementById("start").addEventListener("click", async function() {
-      await schalteShelly(true);
-      setTimeout(checkStatus, 1000);
-    });
-
-    document.getElementById("stop").addEventListener("click", async function() {
-      await schalteShelly(false);
-      setTimeout(checkStatus, 1000);
-    });
-
-    document.getElementById("restart").addEventListener("click", async function() {
-      await schalteShelly(false);
-      setTimeout(async () => {
-        await schalteShelly(true);
-        checkStatus();
-      }, 15000);
-    });
   </script>
 </body>
 </html>
