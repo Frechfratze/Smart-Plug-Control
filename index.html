@@ -125,7 +125,6 @@
   </div>
 
   <script>
-    // Berechnet den SHA-256 Hash (Hex-String)
     async function sha256(message) {
       const msgBuffer = new TextEncoder().encode(message);
       const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
@@ -163,8 +162,8 @@
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
       const urlencoded = new URLSearchParams();
-      urlencoded.append("id", "e465b85d8cd8"); // Deine Device ID
-      urlencoded.append("auth_key", "MmU4OTRmdWlk4A4D429C1AEBBB620E5AA56C8C7E4BE74451AEA01AF818193E6B1FDBB5535AEE6C59824916283299"); // Dein API Key
+      urlencoded.append("id", "e465b85d8cd8"); // Device ID
+      urlencoded.append("auth_key", "MmU4OTRmdWlk4A4D429C1AEBBB620E5AA56C8C7E4BE74451AEA01AF818193E6B1FDBB5535AEE6C59824916283299"); // API Key
 
       const requestOptions = {
         method: "POST",
@@ -180,20 +179,20 @@
         // SYSTEMSTATUS PRÜFEN (ONLINE/OFFLINE)
         const systemStatusDiv = document.getElementById("systemStatus");
         if (data.data.online) {
-          systemStatusDiv.innerHTML = "Systemstatus: 🟢 <b>Online</b>";
+          systemStatusDiv.innerHTML = "Cloud Connection: 🟢 <b>Online</b>";
           systemStatusDiv.className = "status-container online";
         } else {
-          systemStatusDiv.innerHTML = "Systemstatus: 🔴 <b>Offline</b>";
+          systemStatusDiv.innerHTML = "Cloud Connection: 🔴 <b>Offline</b>";
           systemStatusDiv.className = "status-container offline";
         }
 
         // SCHALTZUSTAND PRÜFEN (ON/OFF)
         const powerStatusDiv = document.getElementById("powerStatus");
         if (data.data.device_status["switch:0"].output) {
-          powerStatusDiv.innerHTML = "Schaltzustand: ✅ <b>AN</b>";
+          powerStatusDiv.innerHTML = "Serverstatus: ✅ <b>ON</b>";
           powerStatusDiv.className = "status-container on";
         } else {
-          powerStatusDiv.innerHTML = "Schaltzustand: ❌ <b>AUS</b>";
+          powerStatusDiv.innerHTML = "Serverstatus: ❌ <b>OFF</b>";
           powerStatusDiv.className = "status-container off";
         }
       } catch (error) {
@@ -214,19 +213,19 @@
 
     // Button-Aktionen mit integrierter Sperre:
     document.getElementById("start").addEventListener("click", async function() {
-      disableButtons(5000);
+      disableButtons(6000);
       await schalteShelly(true);
       setTimeout(getShellyStatus, 1000);
     });
 
     document.getElementById("stop").addEventListener("click", async function() {
-      disableButtons(5000);
+      disableButtons(6000);
       await schalteShelly(false);
       setTimeout(getShellyStatus, 1000);
     });
 
     document.getElementById("restart").addEventListener("click", async function() {
-      disableButtons(20000);
+      disableButtons(25000);
       await schalteShelly(false);
       setTimeout(async () => {
         await schalteShelly(true);
@@ -235,7 +234,7 @@
     });
 
     // Periodische Aktualisierung der Statusanzeige alle 5 Sekunden
-    setInterval(getShellyStatus, 5000);
+    setInterval(getShellyStatus, 4000);
     
     // Die bisherige Funktion schalteShelly bleibt unverändert
     async function schalteShelly(turnOn) {
