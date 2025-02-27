@@ -82,8 +82,7 @@
       color: red;
       margin-top: 15px;
     }
-    /* Die ursprüngliche .status-container wird hier genutzt, 
-       aber inhaltlich ersetzen wir ihn mit den zwei neuen Status-Divs */
+    /* Statusanzeige nach deinem Testcode */
     .status-container {
       font-size: 24px;
       margin: 20px auto;
@@ -93,10 +92,8 @@
       text-align: center;
       border: 2px solid;
     }
-    /* Klassen für den Systemstatus */
     .online { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
     .offline { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-    /* Klassen für den Schaltzustand */
     .on { background-color: #cce5ff; color: #004085; border-color: #b8daff; }
     .off { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
   </style>
@@ -117,7 +114,7 @@
 
   <!-- Hauptbereich -->
   <div class="container" style="display: none;">
-    <!-- Status-Anzeigen basierend auf deinem Testcode -->
+    <!-- Statusanzeige -->
     <div id="systemStatus" class="status-container">Systemstatus: <b>Lade...</b></div>
     <div id="powerStatus" class="status-container">Schaltzustand: <b>Lade...</b></div>
     
@@ -128,7 +125,7 @@
   </div>
 
   <script>
-    // Funktion zum Berechnen des SHA-256 Hashes (Hex-String)
+    // Berechnet den SHA-256 Hash (Hex-String)
     async function sha256(message) {
       const msgBuffer = new TextEncoder().encode(message);
       const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
@@ -138,7 +135,7 @@
     }
 
     const CONFIG = {
-      DEVICE_IP: "192.168.68.116",  // Bitte hier die korrekte IP deines Smart Plugs eintragen
+      DEVICE_IP: "192.168.68.116",  // Hier die korrekte IP deines Smart Plugs eintragen
       WEB_USERNAME: "3211db594d2c113a20ddc603efe2ef8c2382f393aed754840783a0bc63bb7be5",
       WEB_PASSWORD: "2ba1abe141836cc507e3694f97f715aa61deec4745981a085fe89939e83ec207"
     };
@@ -160,7 +157,7 @@
       }
     }
 
-    // Implementierung der Statusabfrage aus deinem Testcode:
+    // Implementierung der Statusabfrage aus deinem Testcode
     async function getShellyStatus() {
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -206,18 +203,30 @@
       }
     }
 
-    // Button-Aktionen (Status nach Steuerung aktualisieren)
+    // Funktion zum Sperren/Entsperren der Buttons für eine bestimmte Dauer (in Millisekunden)
+    function disableButtons(duration) {
+      const buttons = document.querySelectorAll("#start, #stop, #restart");
+      buttons.forEach(button => button.disabled = true);
+      setTimeout(() => {
+        buttons.forEach(button => button.disabled = false);
+      }, duration);
+    }
+
+    // Button-Aktionen mit integrierter Sperre:
     document.getElementById("start").addEventListener("click", async function() {
+      disableButtons(5000);
       await schalteShelly(true);
       setTimeout(getShellyStatus, 1000);
     });
 
     document.getElementById("stop").addEventListener("click", async function() {
+      disableButtons(5000);
       await schalteShelly(false);
       setTimeout(getShellyStatus, 1000);
     });
 
     document.getElementById("restart").addEventListener("click", async function() {
+      disableButtons(20000);
       await schalteShelly(false);
       setTimeout(async () => {
         await schalteShelly(true);
@@ -254,3 +263,4 @@
   </script>
 </body>
 </html>
+
